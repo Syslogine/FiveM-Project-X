@@ -94,10 +94,10 @@ AddEventHandler('checkLicensePlate', function(oof)
 	local message = ""
 	local phonenumber = char.phone_number
 	local kekw = oof
-        exports.ghmattimysql:execute('SELECT * FROM characters_cars WHERE `license_plate` = @plate', { ['@plate'] = kekw }, function(result)
+        exports.oxmysql:execute('SELECT * FROM characters_cars WHERE `license_plate` = @plate', { ['@plate'] = kekw }, function(result)
         	if result[1] ~= nil then
-				exports.ghmattimysql:execute('SELECT * FROM characters WHERE `id` = @cid', { ['@cid'] = result[1].cid }, function(data)
-					exports.ghmattimysql:execute('SELECT * FROM jobs_whitelist WHERE `owner` = @cid', { ['@cid'] = data[1].id }, function(penis)
+				exports.oxmysql:execute('SELECT * FROM characters WHERE `id` = @cid', { ['@cid'] = result[1].cid }, function(data)
+					exports.oxmysql:execute('SELECT * FROM jobs_whitelist WHERE `owner` = @cid', { ['@cid'] = data[1].id }, function(penis)
 					-- TriggerClientEvent('notification', source, 'Dispatch: Vehicle comes back to one ' .. data[1].firstname .. ' ' .. data[1].lastname .. ' Over.')
 						if penis[1] ~= nil then
 							job = penis[1].job
@@ -153,7 +153,7 @@ end)
 
 -- done ((sway))
 function CheckLicense(cid, license)
-	exports.ghmattimysql:execute("SELECT @license FROM licenses WHERE cid = @id", {['id'] = cid, ['license'] = license}, function(result)
+	exports.oxmysql:execute("SELECT @license FROM licenses WHERE cid = @id", {['id'] = cid, ['license'] = license}, function(result)
 		if (result[1]) then
 			response = result.license
 		end
@@ -368,14 +368,14 @@ function GrantLicense(src,cid,status,license)
 	print(src,cid,status,license)
 	if license == "weapon" then
 		TriggerClientEvent('DoLongHudText',src, 'You\'ve been granted a '..license..' License.')
-		exports.ghmattimysql:execute("UPDATE user_licenses SET `weapon` = @weapon WHERE cid = @cid", {['weapon'] = "1", ['cid'] = cid})
+		exports.oxmysql:execute("UPDATE user_licenses SET `weapon` = @weapon WHERE cid = @cid", {['weapon'] = "1", ['cid'] = cid})
     end
 end
 
 function removeLicense(src,cid,status,license)
 	if license == "weapon" then
 		TriggerClientEvent('DoLongHudText',src, 'Your '..license..' license has been revoked.')
-		exports.ghmattimysql:execute("UPDATE user_licenses SET `weapon` = @weapon WHERE cid = @cid", {['weapon'] = "0", ['cid'] = cid})
+		exports.oxmysql:execute("UPDATE user_licenses SET `weapon` = @weapon WHERE cid = @cid", {['weapon'] = "0", ['cid'] = cid})
     end
 end
 
@@ -476,7 +476,7 @@ end)
 
 function checkDBForDna(ident,dna)
 	local canUse = true
-	exports.ghmattimysql:execute("SELECT meta FROM characters WHERE id = @identifier", {['identifier'] = ident}, function(result)
+	exports.oxmysql:execute("SELECT meta FROM characters WHERE id = @identifier", {['identifier'] = ident}, function(result)
 		if (result[1]) then
 			meta = json.decode(result[1].dna)
 			if meta.dna ~= dna then
@@ -525,7 +525,7 @@ AddEventHandler('bones:server:updateServer', function(bones)
 	local pastebones = json.encode(bones)
 	local bones = json.encode(bones)
 
-	exports.ghmattimysql:execute("UPDATE characters SET `bones` = @bones WHERE id = @identifier", {['bones'] = bones, ['identifier'] = characterId})
+	exports.oxmysql:execute("UPDATE characters SET `bones` = @bones WHERE id = @identifier", {['bones'] = bones, ['identifier'] = characterId})
 end)
 
 RegisterServerEvent("Evidence:checkDna")
@@ -535,7 +535,7 @@ AddEventHandler("Evidence:checkDna", function()
 		local char = user:getVar("character")
 		local needsNewDna = false
 
-		exports.ghmattimysql:execute("SELECT dna FROM characters WHERE id = @identifier", {['identifier'] = char.id}, function(result)
+		exports.oxmysql:execute("SELECT dna FROM characters WHERE id = @identifier", {['identifier'] = char.id}, function(result)
 			if (result[1]) then
 				if(result[1].dna) then
 					meta = json.decode(result[1].dna)
@@ -564,7 +564,7 @@ AddEventHandler("Evidence:checkDna", function()
 	end
 	local metaData = {["dna"] = dna, ["health"] = 200, ["armour"] = 0, ["animSet"] = "none"}
 	 meta = json.encode(metaData)
-	 exports.ghmattimysql:execute("UPDATE characters SET `dna` = @metaData WHERE id = @identifier", {['metaData'] = meta, ['identifier'] = characterId})
+	 exports.oxmysql:execute("UPDATE characters SET `dna` = @metaData WHERE id = @identifier", {['metaData'] = meta, ['identifier'] = characterId})
 	end
 end)
 
@@ -582,7 +582,7 @@ AddEventHandler('police:setServerMeta', function(health, armor, thrist, hungry)
 	}
 
 	if not user then return end
-	exports.ghmattimysql:execute(q, v, function()
+	exports.oxmysql:execute(q, v, function()
 
     end)
 end)
@@ -596,9 +596,9 @@ AddEventHandler('police:SetMeta', function()
 	local identifier = user:getCurrentCharacter().owner
 	local metadata 
 
-	exports.ghmattimysql:execute("SELECT metaData FROM characters WHERE id = @cid;", {["cid"] = cid}, function(result)
+	exports.oxmysql:execute("SELECT metaData FROM characters WHERE id = @cid;", {["cid"] = cid}, function(result)
 		if (result[1].metaData) then
-			exports.ghmattimysql:execute("SELECT stress_level FROM characters WHERE id = @cid;", {["cid"] = cid}, function(stress)
+			exports.oxmysql:execute("SELECT stress_level FROM characters WHERE id = @cid;", {["cid"] = cid}, function(stress)
 
 				metadata = json.decode(result[1].metaData)
 				TriggerClientEvent('police:setClientMeta', src, {thirst = metadata.thirst, hunger = metadata.hunger, health = metadata.health, armour = metadata.armour},stress[1].stress_level,developer)
@@ -661,7 +661,7 @@ AddEventHandler('police:setEmoteData', function(emoteTable)
 	local user = exports["ethical-base"]:getModule("Player"):GetUser(src)
     local char = user:getCurrentCharacter()
 	local emote = json.encode(emoteTable)
-	exports.ghmattimysql:execute("UPDATE characters SET `emotes` = @emotes WHERE id = @cid", {['emotes'] = emote, ['cid'] = char.id})
+	exports.oxmysql:execute("UPDATE characters SET `emotes` = @emotes WHERE id = @cid", {['emotes'] = emote, ['cid'] = char.id})
 end)
 
 RegisterServerEvent('police:setAnimData')
@@ -670,7 +670,7 @@ AddEventHandler('police:setAnimData', function(AnimSet)
 	local user = exports["ethical-base"]:getModule("Player"):GetUser(src)
     local char = user:getCurrentCharacter()
 	local metaData = json.encode(AnimSet)
-	exports.ghmattimysql:execute("UPDATE characters SET `meta` = @metaData WHERE id = @cid", {['metaData'] = metaData, ['cid'] = char.id})
+	exports.oxmysql:execute("UPDATE characters SET `meta` = @metaData WHERE id = @cid", {['metaData'] = metaData, ['cid'] = char.id})
 end)
 
 RegisterServerEvent('police:getAnimData')
@@ -679,7 +679,7 @@ AddEventHandler('police:getAnimData', function()
 	local user = exports["ethical-base"]:getModule("Player"):GetUser(src)
     local char = user:getCurrentCharacter()
 
-	exports.ghmattimysql:execute("SELECT meta FROM characters WHERE id = @cid", {['cid'] = char.id}, function(result)
+	exports.oxmysql:execute("SELECT meta FROM characters WHERE id = @cid", {['cid'] = char.id}, function(result)
 		if (result[1]) then
 			if not result[1].meta then
 				TriggerClientEvent('checkDNA', src)
@@ -701,7 +701,7 @@ AddEventHandler('police:getEmoteData', function()
 	local user = exports["ethical-base"]:getModule("Player"):GetUser(src)
     local char = user:getCurrentCharacter()
 
-	exports.ghmattimysql:execute("SELECT emotes FROM characters WHERE id = @cid", {['cid'] = char.id}, function(result)
+	exports.oxmysql:execute("SELECT emotes FROM characters WHERE id = @cid", {['cid'] = char.id}, function(result)
 		if(result[1]) then
 			local emotes = json.decode(result[1].emotes)
 			if result[1] ~= nil then
@@ -726,7 +726,7 @@ AddEventHandler('police:getEmoteData', function()
 				}
 
 				local emote = json.encode(emoteTable)
-				exports.ghmattimysql:execute("UPDATE characters SET `emotes` = @emotes WHERE id = @cid", {['emotes'] = emote, ['identifier'] = char.id})
+				exports.oxmysql:execute("UPDATE characters SET `emotes` = @emotes WHERE id = @cid", {['emotes'] = emote, ['identifier'] = char.id})
 				TriggerClientEvent("emote:setEmotesFromDB", src, emoteTable)
 			end
 		end
@@ -748,24 +748,24 @@ AddEventHandler('police:whitelist', function(arg,jobType)
 	local char = user:getCurrentCharacter()
 
 	if jobType == "police" or jobType == "ems" or jobType == "doctor" or jobType == "therapist" or jobType == "doc" then
-		exports.ghmattimysql:execute("SELECT rank from jobs_whitelist WHERE job = @job AND cid = @cid",{['job'] = jobType, ["cid"] = arg}, function(result)
+		exports.oxmysql:execute("SELECT rank from jobs_whitelist WHERE job = @job AND cid = @cid",{['job'] = jobType, ["cid"] = arg}, function(result)
 			if(result[1]) then
 				TriggerClientEvent("DoLongHudText", src, 'This person is already on the list.', 2)
 			else
 				exports["ethical-log"]:AddLog("HC Added Job","Character: "..char.id.." Changed Char: "..arg.." Job whitelisting: "..jobType.." Type: Added", {source = src, char = char.id})
 
-				exports.ghmattimysql:execute("INSERT INTO jobs_whitelist (owner,cid,job,rank) VALUES (@owner,@cid,@job,@rank)",
+				exports.oxmysql:execute("INSERT INTO jobs_whitelist (owner,cid,job,rank) VALUES (@owner,@cid,@job,@rank)",
 				{['owner'] = arg,['cid'] = arg,['job'] = jobType,['rank'] = 1})
 				
 				TriggerClientEvent("DoLongHudText", src, "Person Added , CID = "..arg.." Job = "..jobType.." Rank 1",1)
 			end
 		end)
 	elseif jobType == "judge" then
-		exports.ghmattimysql:execute("SELECT judge_type FROM characters WHERE id = @cid", {["cid"] = char.id}, function(result)
+		exports.oxmysql:execute("SELECT judge_type FROM characters WHERE id = @cid", {["cid"] = char.id}, function(result)
 			if result[1] then
 				if result[1].judge_type == 10 then
 					exports["ethical-log"]:AddLog("HC Added Job","Character: "..char.id.." Changed Char: "..arg.." Job whitelisting "..jobType.." Type: Added", {source = src,char = char.id})
-					exports.ghmattimysql:execute("UPDATE characters SET `judge_type`=@rank WHERE id = @cid", {['rank'] = 1, ["cid"] = arg})
+					exports.oxmysql:execute("UPDATE characters SET `judge_type`=@rank WHERE id = @cid", {['rank'] = 1, ["cid"] = arg})
 					TriggerClientEvent("DoLongHudText", src, 'Person added , CID = '..arg.." Job = "..jobType.." Rank 1",1)
 				else
 					TriggerClientEvent("DoLongHudText", src, 'Not high enough rank.',2)
@@ -786,24 +786,24 @@ AddEventHandler('police:remove', function(arg,jobType)
 	local char = user:getCurrentCharacter()
 
 	if jobType == "police" or jobType == "ems" or jobType == "doctor" or jobType == "therapist" or jobType == "doc" then
-		exports.ghmattimysql:execute("SELECT rank from jobs_whitelist WHERE job = @job AND cid = @cid",{['job'] = jobType, ["cid"] = arg}, function(result)
+		exports.oxmysql:execute("SELECT rank from jobs_whitelist WHERE job = @job AND cid = @cid",{['job'] = jobType, ["cid"] = arg}, function(result)
 			if(result[1]) then
 				TriggerClientEvent("DoLongHudText", src, 'This person is already on the list.', 2)
 			else
 				exports["ethical-log"]:AddLog("HC Removed Job","Character: "..char.id.." Changed Char: "..arg.." Job whitelisting: "..jobType.." Type: Removed", {source = src, char = char.id})
 
-				exports.ghmattimysql:execute("DELETE FROM jobs_whitelist WHERE owner = @owner, cid = @cid, job = @job",
+				exports.oxmysql:execute("DELETE FROM jobs_whitelist WHERE owner = @owner, cid = @cid, job = @job",
 				{['owner'] = arg,['cid'] = arg,['job'] = jobType})
 				
 				TriggerClientEvent("DoLongHudText", src, "Person Removed , CID = "..arg.." Job = "..jobType,1)
 			end
 		end)
 	elseif jobType == "judge" then
-		exports.ghmattimysql:execute("SELECT judge_type FROM characters WHERE id = @cid", {["cid"] = char.id}, function(result)
+		exports.oxmysql:execute("SELECT judge_type FROM characters WHERE id = @cid", {["cid"] = char.id}, function(result)
 			if result[1] then
 				if result[1].judge_type == 10 then
 					exports["ethical-log"]:AddLog("HC Removed Job","Character: "..char.id.." Changed Char: "..arg.." Job whitelisting "..jobType.." Type: Removed", {source = src,char = char.id})
-					exports.ghmattimysql:execute("UPDATE characters SET `judge_type`=@rank WHERE id = @cid", {['rank'] = 0, ["cid"] = arg})
+					exports.oxmysql:execute("UPDATE characters SET `judge_type`=@rank WHERE id = @cid", {['rank'] = 0, ["cid"] = arg})
 					TriggerClientEvent("DoLongHudText", src, 'Person removed , CID = '..arg.." Job = "..jobType,1)
 				else
 					TriggerClientEvent("DoLongHudText", src, 'Not high enough rank.',2)
@@ -825,7 +825,7 @@ end)
 -- 	local user = exports["ethical-base"]:getModule("Player"):GetUser(src)
 -- 	local steamcheck = user:getVar("steamid")
 
--- 	exports.ghmattimysql:execute("SELECT * FROM vip_list WHERE steamid = @steamcheck",{['steamcheck'] = steamcheck}, function(result)
+-- 	exports.oxmysql:execute("SELECT * FROM vip_list WHERE steamid = @steamcheck",{['steamcheck'] = steamcheck}, function(result)
 -- 		if result[1] then
 -- 			commands:RemoveCommand("/priority", src)
 
@@ -844,7 +844,7 @@ end)
 -- 				local steamcheck = user:getVar("steamid")
 
 -- 				if args[1] == "check" then
--- 					exports.ghmattimysql:execute("SELECT * FROM users_whitelist WHERE steamid = @steamcheck",{['steamcheck'] = steamcheck}, function(result)
+-- 					exports.oxmysql:execute("SELECT * FROM users_whitelist WHERE steamid = @steamcheck",{['steamcheck'] = steamcheck}, function(result)
 
 -- 						TriggerClientEvent("DoLongHudText",src,"Targets rank was " .. result[1].power)
 -- 					end)
@@ -858,7 +858,7 @@ end)
 -- 						if rank < 1 then
 -- 							rank = 0
 -- 						end
--- 						exports.ghmattimysql:execute("UPDATE users_whitelist SET 'power'=@rank,'admin_name'=@name WHERE steamid = @steamcheck",{['name'] = name, ['rank'] = rank, ['steamcheck'] = steamcheck})
+-- 						exports.oxmysql:execute("UPDATE users_whitelist SET 'power'=@rank,'admin_name'=@name WHERE steamid = @steamcheck",{['name'] = name, ['rank'] = rank, ['steamcheck'] = steamcheck})
 -- 						if rank == 0 then
 -- 							TriggerClientEvent("DoLongHudText",src,steamcheck .. " was unwhitelisted.")
 -- 						else
@@ -892,7 +892,7 @@ end)
 -- 				local steamcheck = user:getVar("steamid")
 
 -- 				if args[2] == "check" then
--- 					exports.ghmattimysql:execute("SELECT * FROM users_whitelist WHERE steamid = @steamcheck",{['steamcheck'] = steamcheck}, function(result)
+-- 					exports.oxmysql:execute("SELECT * FROM users_whitelist WHERE steamid = @steamcheck",{['steamcheck'] = steamcheck}, function(result)
 
 -- 						TriggerClientEvent("DoLongHudText",src,"Targets rank was " .. result[1].power)
 -- 					end)
@@ -1217,7 +1217,7 @@ function selectProperties(src, callback)
 	local user = exports['ethical-base']:getModule("Player"):GetUser(src)
 	local character = user:getCurrentCharacter()
 
-	exports.ghmattimysql.execute("SELECT name from user_appertement WHERE cid = @cid", { ['cid'] = character.id}, function(result)
+	exports.oxmysql.execute("SELECT name from user_appertement WHERE cid = @cid", { ['cid'] = character.id}, function(result)
 		local results = {}
 		if (result) then
 			for k,v in iparis(result) do

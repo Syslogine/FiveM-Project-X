@@ -94,93 +94,104 @@ Citizen.CreateThread(function()
     local lastCheck = 0
     local distance = {}
     local compiledMarkers = {}
+
     while true do 
         Wait(1)
         local isNear = false
         local foundLock = -1
         
-        if markers ~= nil then
-
-            if (GetGameTimer()-lastCheck) > 2000 then -- adjust this value for timing 
+        if markers then
+            if (GetGameTimer() - lastCheck) > 2000 then -- Adjust this value for timing 
                 compiledMarkers = {}
-                local player = GetEntityCoords(PlayerPedId())
+                local playerCoords = GetEntityCoords(PlayerPedId())
                 for k,v in pairs(markers) do
-                    distance[k] = #(vector3(v["pos"][1],v["pos"][2],v["pos"][3]) - player)
-                    compiledMarkers[k] = true
+                    if v and v.pos then
+                        distance[k] = #(vector3(v.pos[1], v.pos[2], v.pos[3]) - playerCoords)
+                        compiledMarkers[k] = true
+                    else
+                        compiledMarkers[k] = false
+                    end
                 end
                 lastCheck = GetGameTimer()
             end
 
-            
-            for k,j in pairs(compiledMarkers) do
-                local continue = false
-                local haveNotcompleted = false
+            for k,_ in pairs(compiledMarkers) do
+                if not compiledMarkers[k] then goto continue end -- Skip iteration if marker or its position is nil
+
                 local dist = distance[k]
                 local v = markers[k]
-                if dist == nil then continue = true end
-                -- print(dist)
-                -- print(continue)
-                if k == 36 then if not states["Prison_Electric"] or not states["Prison_Physical"] then haveNotcompleted = true end end
 
-                if isCop or (not flags[k].isFinished and not continue) then
+                if k == 36 then 
+                    if not states["Prison_Electric"] or not states["Prison_Physical"] then
+                        haveNotcompleted = true
+                    end
+                end
 
-                    if dist < 30 then isNear = true end
-                    if dist < 5 and isCop then DrawMarker(27,v["pos"][1],v["pos"][2],v["pos"][3]-0.90, 0, 0, 0, 0, 0, 0, 0.69, 0.69, 0.3, 100, 255, 255, 60, 0, 0, 2, 0, 0, 0, 0) end
-                    if dist < 5 and not isCop then 
-                        local rgb = {250,255,190}
-                        if sendServerFlags then
-                            rgb = {255,0,0}
-                        end
-                        DrawMarker(27,v["pos"][1],v["pos"][2],v["pos"][3]-0.90, 0, 0, 0, 0, 0, 0, 0.60, 0.60, 0.3, rgb[1], rgb[2], rgb[3], 60, 0, 0, 2, 0, 0, 0, 0) 
+                if isCop or (flags[k] and flags[k].isFinished and dist and dist < 30) then
+                    isNear = true
+                    if isCop and dist and dist < 5 then
+                        DrawMarker(27, v.pos[1], v.pos[2], v.pos[3] - 0.90, 0, 0, 0, 0, 0, 0, 0.69, 0.69, 0.3, 100, 255, 255, 60, 0, 0, 2, 0, 0, 0, 0)
+                    elseif not isCop and dist and dist < 5 then
+                        local rgb = {250, 255, 190}
+                        if sendServerFlags then rgb = {255, 0, 0} end
+                        DrawMarker(27, v.pos[1], v.pos[2], v.pos[3] - 0.90, 0, 0, 0, 0, 0, 0, 0.60, 0.60, 0.3, rgb[1], rgb[2], rgb[3], 60, 0, 0, 2, 0, 0, 0, 0)
                     end
 
-                    if dist < 1.3 and not flags[k].inUse then
-                        if IsControlJustPressed(1,23) and isCop then
+                    if dist and dist < 1.3 and not flags[k].inUse then
+                        if IsControlJustPressed(1, 23) and isCop then
                             checkEvidence(k)
                         end 
                         foundLock = k
                     end
-                end
-                if not isCop and flags[k].isFinished and dist < 30 then
+                elseif not isCop and flags[k] and flags[k].isFinished and dist and dist < 30 then
                     isNear = true
-                    DrawMarker(27,v["pos"][1],v["pos"][2],v["pos"][3]-0.90, 0, 0, 0, 0, 0, 0, 0.60, 0.60, 0.3, 222, 2, 2, 60, 0, 0, 2, 0, 0, 0, 0) 
+                    DrawMarker(27, v.pos[1], v.pos[2], v.pos[3] - 0.90, 0, 0, 0, 0, 0, 0, 0.60, 0.60, 0.3, 222, 2, 2, 60, 0, 0, 2, 0, 0, 0, 0)
                 end
-
+                ::continue::
             end
 
             if foundLock ~= -1 then
                 if not isCop then
                     local card = 1
-                    if markers[foundLock]["group"] == "mainBank" then card = CURRENT_CARD_CITY elseif markers[foundLock]["group"] == "paletoBank" then card = CURRENT_CARD_PALETO end
-                    renderOptions(markers[foundLock]["toolType"],card)
+                    if markers[foundLock] and markers[foundLock].group then 
+                        if markers[foundLock].group == "mainBank" then 
+                            card = CURRENT_CARD_CITY 
+                        elseif markers[foundLock].group == "paletoBank" then 
+                            card = CURRENT_CARD_PALETO 
+                        end
+                    end
+                    renderOptions(markers[foundLock] and markers[foundLock].toolType, card)
                 end
             else
                 renderOptions("off")
             end
-
         end
 
         if not isNear then Wait(2000) end
     end
 end)
 
+
+
 function VaultDoor()
-    local VaultDoor = GetClosestObjectOfType(255.2283, 223.976, 102.3932, 25.0, `v_ilev_bk_vaultdoor`, 0, 0, 0)
-    local CurrentHeading = 160.0
+    local vaultDoor = GetClosestObjectOfType(255.2283, 223.976, 102.3932, 25.0, 'v_ilev_bk_vaultdoor', 0, 0, 0)
+    local targetHeading = 160.0
 
-    if states["vaultDoor"] and GetEntityHeading(VaultDoor) > 159 then
-
-        for i = 1, 50 do
-            SetEntityHeading(VaultDoor, CurrentHeading - i)
-            Wait(5)
+    if states["vaultDoor"] then
+        local currentHeading = GetEntityHeading(vaultDoor)
+        if currentHeading > targetHeading then
+            for i = 1, 50 do
+                SetEntityHeading(vaultDoor, currentHeading - i)
+                Wait(5)
+            end
         end
-
-        FreezeEntityPosition(VaultDoor,true)
-    elseif not states["vaultDoor"] then 
-        SetEntityHeading(VaultDoor,160.0)
-        FreezeEntityPosition(VaultDoor,true)
+    else
+        SetEntityHeading(vaultDoor, targetHeading)
     end
+
+    FreezeEntityPosition(vaultDoor, true)
 end
+
 
 
 

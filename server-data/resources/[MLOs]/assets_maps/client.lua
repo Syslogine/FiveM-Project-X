@@ -26,8 +26,7 @@ Citizen.CreateThread(function()
 	
 	
 		-- Simeon Car Dealer Shop Window Fix:
-			RequestIpl("shr_int")
-			RequestIpl("shr_int_lod")
+		
 				--( -62.698680877686, -1099.888671875, 26.297519683838 )
 	
 	

@@ -1,12 +1,12 @@
 local function checkExistenceClothes(cid, cb)
-    exports.ghmattimysql:execute("SELECT cid FROM character_current WHERE cid = @cid LIMIT 1;", {["cid"] = cid}, function(result)
+    exports.oxmysql:execute("SELECT cid FROM character_current WHERE cid = @cid LIMIT 1;", {["cid"] = cid}, function(result)
         local exists = result and result[1] and true or false
         cb(exists)
     end)
 end
 
 local function checkExistenceFace(cid, cb)
-    exports.ghmattimysql:execute("SELECT cid FROM character_face WHERE cid = @cid LIMIT 1;", {["cid"] = cid}, function(result)
+    exports.oxmysql:execute("SELECT cid FROM character_face WHERE cid = @cid LIMIT 1;", {["cid"] = cid}, function(result)
         local exists = result and result[1] and true or false
         cb(exists)
     end)
@@ -33,13 +33,13 @@ AddEventHandler("raid_clothes:insert_character_current",function(data)
             local cols = "cid, model, drawables, props, drawtextures, proptextures"
             local vals = "@cid, @model, @drawables, @props, @drawtextures, @proptextures"
 
-            exports.ghmattimysql:execute("INSERT INTO character_current ("..cols..") VALUES ("..vals..")", values, function()
+            exports.oxmysql:execute("INSERT INTO character_current ("..cols..") VALUES ("..vals..")", values, function()
             end)
             return
         end
 
         local set = "model = @model,drawables = @drawables,props = @props,drawtextures = @drawtextures,proptextures = @proptextures"
-        exports.ghmattimysql:execute("UPDATE character_current SET "..set.." WHERE cid = @cid", values)
+        exports.oxmysql:execute("UPDATE character_current SET "..set.." WHERE cid = @cid", values)
     end)
 end)
 
@@ -71,13 +71,13 @@ AddEventHandler("raid_clothes:insert_character_face",function(data)
             local cols = "cid, hairColor, headBlend, headOverlay, headStructure"
             local vals = "@cid, @hairColor, @headBlend, @headOverlay, @headStructure"
 
-            exports.ghmattimysql:execute("INSERT INTO character_face ("..cols..") VALUES ("..vals..")", values, function()
+            exports.oxmysql:execute("INSERT INTO character_face ("..cols..") VALUES ("..vals..")", values, function()
             end)
             return
         end
 
         local set = "hairColor = @hairColor,headBlend = @headBlend, headOverlay = @headOverlay,headStructure = @headStructure"
-        exports.ghmattimysql:execute("UPDATE character_face SET "..set.." WHERE cid = @cid", values )
+        exports.oxmysql:execute("UPDATE character_face SET "..set.." WHERE cid = @cid", values )
     end)
 end)
 
@@ -89,7 +89,7 @@ AddEventHandler("raid_clothes:get_character_face",function(pSrc)
 
     if not characterId then return end
 
-    exports.ghmattimysql:execute("SELECT cc.model, cf.hairColor, cf.headBlend, cf.headOverlay, cf.headStructure FROM character_face cf INNER JOIN character_current cc on cc.cid = cf.cid WHERE cf.cid = @cid", {['cid'] = characterId}, function(result)
+    exports.oxmysql:execute("SELECT cc.model, cf.hairColor, cf.headBlend, cf.headOverlay, cf.headStructure FROM character_face cf INNER JOIN character_current cc on cc.cid = cf.cid WHERE cf.cid = @cid", {['cid'] = characterId}, function(result)
         if (result ~= nil and result[1] ~= nil) then
             local temp_data = {
                 hairColor = json.decode(result[1].hairColor),
@@ -114,7 +114,7 @@ AddEventHandler("raid_clothes:get_character_current",function(pSrc)
     local char = user:getCurrentCharacter()
     local cid = char.id
     if not cid then return end
-    exports.ghmattimysql:execute("SELECT * FROM character_current WHERE cid = @cid", {['cid'] = cid}, function(result)
+    exports.oxmysql:execute("SELECT * FROM character_current WHERE cid = @cid", {['cid'] = cid}, function(result)
         local temp_data = {
             model = result[1].model,
             drawables = json.decode(result[1].drawables),
@@ -131,12 +131,12 @@ AddEventHandler("raid_clothes:retrieve_tats", function(pSrc)
     local src = (not pSrc and source or pSrc)
 	local user = exports["ethical-base"]:getModule("Player"):GetUser(src)
     local char = user:getCurrentCharacter()
-	exports.ghmattimysql:execute("SELECT * FROM playersTattoos WHERE identifier = @identifier", {['identifier'] = char.id}, function(result)
+	exports.oxmysql:execute("SELECT * FROM playersTattoos WHERE identifier = @identifier", {['identifier'] = char.id}, function(result)
         if(#result == 1) then
 			TriggerClientEvent("raid_clothes:settattoos", src, json.decode(result[1].tattoos))
 		else
 			local tattooValue = "{}"
-			exports.ghmattimysql:execute("INSERT INTO playersTattoos (identifier, tattoos) VALUES (@identifier, @tattoo)", {['identifier'] = char.id, ['tattoo'] = tattooValue})
+			exports.oxmysql:execute("INSERT INTO playersTattoos (identifier, tattoos) VALUES (@identifier, @tattoo)", {['identifier'] = char.id, ['tattoo'] = tattooValue})
 			TriggerClientEvent("raid_clothes:settattoos", src, {})
 		end
 	end)
@@ -147,7 +147,7 @@ AddEventHandler("raid_clothes:set_tats", function(tattoosList)
 	local src = source
 	local user = exports["ethical-base"]:getModule("Player"):GetUser(src)
     local char = user:getCurrentCharacter()
-	exports.ghmattimysql:execute("UPDATE playersTattoos SET tattoos = @tattoos WHERE identifier = @identifier", {['tattoos'] = json.encode(tattoosList), ['identifier'] = char.id})
+	exports.oxmysql:execute("UPDATE playersTattoos SET tattoos = @tattoos WHERE identifier = @identifier", {['tattoos'] = json.encode(tattoosList), ['identifier'] = char.id})
 end)
 
 
@@ -161,7 +161,7 @@ AddEventHandler("raid_clothes:get_outfit",function(slot)
 
     if not characterId then return end
 
-    exports.ghmattimysql:execute("SELECT * FROM character_outfits WHERE cid = @cid and slot = @slot", {
+    exports.oxmysql:execute("SELECT * FROM character_outfits WHERE cid = @cid and slot = @slot", {
         ['cid'] = characterId,
         ['slot'] = slot
     }, function(result)
@@ -192,7 +192,7 @@ AddEventHandler("raid_clothes:get_outfit",function(slot)
             }
 
             local set = "model = @model, drawables = @drawables, props = @props,drawtextures = @drawtextures,proptextures = @proptextures"
-            exports.ghmattimysql:execute("UPDATE character_current SET "..set.." WHERE cid = @cid",values)
+            exports.oxmysql:execute("UPDATE character_current SET "..set.." WHERE cid = @cid",values)
         else
             TriggerClientEvent("DoLongHudText", src, "No outfit on slot " .. slot,2)
             return
@@ -210,7 +210,7 @@ AddEventHandler("raid_clothes:set_outfit",function(slot, name, data)
 
     if not characterId then return end
 
-    exports.ghmattimysql:execute("SELECT slot FROM character_outfits WHERE cid = @cid and slot = @slot", {
+    exports.oxmysql:execute("SELECT slot FROM character_outfits WHERE cid = @cid and slot = @slot", {
         ['cid'] = characterId,
         ['slot'] = slot
     }, function(result)
@@ -228,7 +228,7 @@ AddEventHandler("raid_clothes:set_outfit",function(slot, name, data)
             }
 
             local set = "model = @model,name = @name,drawables = @drawables,props = @props,drawtextures = @drawtextures,proptextures = @proptextures,hairColor = @hairColor"
-            exports.ghmattimysql:execute("UPDATE character_outfits SET "..set.." WHERE cid = @cid and slot = @slot",values)
+            exports.oxmysql:execute("UPDATE character_outfits SET "..set.." WHERE cid = @cid and slot = @slot",values)
         else
             local cols = "cid, model, name, slot, drawables, props, drawtextures, proptextures, hairColor"
             local vals = "@cid, @model, @name, @slot, @drawables, @props, @drawtextures, @proptextures, @hairColor"
@@ -245,7 +245,7 @@ AddEventHandler("raid_clothes:set_outfit",function(slot, name, data)
                 ["hairColor"] = json.encode(data.hairColor)
             }
 
-            exports.ghmattimysql:execute("INSERT INTO character_outfits ("..cols..") VALUES ("..vals..")", values, function()
+            exports.oxmysql:execute("INSERT INTO character_outfits ("..cols..") VALUES ("..vals..")", values, function()
                 TriggerClientEvent("DoLongHudText", src, name .. " stored in slot " .. slot,1)
             end)
         end
@@ -263,7 +263,7 @@ AddEventHandler("raid_clothes:remove_outfit",function(slot)
 
     if not cid then return end
 
-    exports.ghmattimysql:execute( "DELETE FROM character_outfits WHERE cid = @cid AND slot = @slot", { ['cid'] = cid,  ["slot"] = slot } )
+    exports.oxmysql:execute( "DELETE FROM character_outfits WHERE cid = @cid AND slot = @slot", { ['cid'] = cid,  ["slot"] = slot } )
     TriggerClientEvent("DoLongHudText", src,"Removed slot " .. slot .. ".",1)
 end)
 
@@ -275,7 +275,7 @@ AddEventHandler("raid_clothes:list_outfits",function()
     local slot = slot
     local name = name
     if not cid then return end
-    exports.ghmattimysql:execute("SELECT slot, name FROM character_outfits WHERE cid = @cid", {['cid'] = cid}, function(skincheck)  
+    exports.oxmysql:execute("SELECT slot, name FROM character_outfits WHERE cid = @cid", {['cid'] = cid}, function(skincheck)  
         for i = 1, #skincheck do
             TriggerClientEvent('ethical-context:sendMenu', src, {
                 {
@@ -302,10 +302,10 @@ AddEventHandler("clothing:checkIfNew", function()
     local cid = user:getCurrentCharacter().id
     local dateCreated = user:getCurrentCharacter()
 
-    exports.ghmattimysql:execute("SELECT count(rank) whitelist FROM jobs_whitelist WHERE cid = @cid LIMIT 1", {
+    exports.oxmysql:execute("SELECT count(rank) whitelist FROM jobs_whitelist WHERE cid = @cid LIMIT 1", {
         ['cid'] = cid
     }, function(isWhitelisted)
-        exports.ghmattimysql:scalar("SELECT count(model) FROM character_current WHERE cid = @cid LIMIT 1", {
+        exports.oxmysql:scalar("SELECT count(model) FROM character_current WHERE cid = @cid LIMIT 1", {
             ['cid'] = cid
         }, function(result)
             local isService = false;
@@ -313,7 +313,7 @@ AddEventHandler("clothing:checkIfNew", function()
             if result == 0 then
                 return
             else
-                exports.ghmattimysql:execute("SELECT * FROM characters where id = @cid", {['@cid'] = cid}, function(data)
+                exports.oxmysql:execute("SELECT * FROM characters where id = @cid", {['@cid'] = cid}, function(data)
                     if data[1].jail_time >= 1 then
                         TriggerClientEvent("hotel:createRoom", src, false, false)
                     elseif data[1].jail_time <= 0 then

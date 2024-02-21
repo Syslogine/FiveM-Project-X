@@ -50,7 +50,7 @@ AddEventHandler("ethical-base:characterLoaded", function(user, char)
 				["cid"] = char.id
 			}
 
-			exports.ghmattimysql.execute(q, v, function()
+			exports.oxmysql.execute(q, v, function()
 				char.phone_number = math.floor(char.phone_number)
 				user:setCharacter(char)
 			end)
@@ -62,10 +62,10 @@ RegisterServerEvent("paycheck:collect")
 AddEventHandler("paycheck:collect", function(cid)
     local src = source
     local user = exports["ethical-base"]:getModule("Player"):GetUser(src)
-    exports.ghmattimysql:execute('SELECT `paycheck` FROM characters WHERE `id`= ?', {cid}, function(data)
+    exports.oxmysql:execute('SELECT `paycheck` FROM characters WHERE `id`= ?', {cid}, function(data)
         local amount = tonumber(data[1].paycheck)
         if amount >= 1 then
-            exports.ghmattimysql:execute("UPDATE characters SET `paycheck` = ? WHERE `id` = ?", {"0", cid})
+            exports.oxmysql:execute("UPDATE characters SET `paycheck` = ? WHERE `id` = ?", {"0", cid})
             user:addBank(amount)
         else
             TriggerClientEvent("DoLongHudText", src, "Your broke, go work!")

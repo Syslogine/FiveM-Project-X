@@ -137,7 +137,7 @@ function ETHICAL.Core.CreateCharacter(self, charData, src, callback)
 	local ln = charData.lastname
 
 
-	exports.ghmattimysql:execute("SELECT first_name FROM characters WHERE first_name = @fn AND last_name = @ln", 
+	exports.oxmysql:execute("SELECT first_name FROM characters WHERE first_name = @fn AND last_name = @ln", 
 	{
 	["fn"] = fn, 
 	["ln"] = ln

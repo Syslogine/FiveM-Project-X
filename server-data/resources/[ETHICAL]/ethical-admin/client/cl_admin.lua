@@ -19,7 +19,6 @@ end
 function ETHICAL.Admin.Init(self)
     self.Menu:Init()
     self:CheckForSessions()
-    SetRichPresence("Version 1.1")
 end
 
 local checkingForSessions

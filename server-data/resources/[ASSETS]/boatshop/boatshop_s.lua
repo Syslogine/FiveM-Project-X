@@ -62,7 +62,7 @@ AddEventHandler('ply_docks:BuyForBoat', function(name, boat, price, plate, prima
     local pearlescentcolor = pearlescentcolor
     local wheelcolor = wheelcolor
 
-    exports.ghmattimysql:execute("INSERT INTO user_boat (identifier,boat_name,boat_model,boat_price,boat_plate,boat_state,boat_colorprimary,boat_colorsecondary,boat_pearlescentcolor,boat_wheelcolor) VALUES (@username,@name,@boat,@price,@plate,@state,@primarycolor,@secondarycolor,@pearlescentcolor,@wheelcolor)",
+    exports.oxmysql:execute("INSERT INTO user_boat (identifier,boat_name,boat_model,boat_price,boat_plate,boat_state,boat_colorprimary,boat_colorsecondary,boat_pearlescentcolor,boat_wheelcolor) VALUES (@username,@name,@boat,@price,@plate,@state,@primarycolor,@secondarycolor,@pearlescentcolor,@wheelcolor)",
     {['@username'] = char.id, ['@name'] = name, ['@boat'] = boat, ['@price'] = price, ['@plate'] = plate, ['@state'] = state, ['@primarycolor'] = primarycolor, ['@secondarycolor'] = secondarycolor, ['@pearlescentcolor'] = pearlescentcolor, ['@wheelcolor'] = wheelcolor}, function(data)
     end)
 end)

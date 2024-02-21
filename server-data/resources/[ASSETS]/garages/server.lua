@@ -82,7 +82,7 @@ AddEventHandler('garages:getVehicleList', function()
 	local src = source
 	local user = exports["ethical-base"]:getModule("Player"):GetUser(src)
 	local char = user:getCurrentCharacter()
-	exports.ghmattimysql:execute('SELECT * FROM characters_cars WHERE cid = @cid', { ['@cid'] = char.id }, function(vehicles)
+	exports.oxmysql:execute('SELECT * FROM characters_cars WHERE cid = @cid', { ['@cid'] = char.id }, function(vehicles)
 		local v = vehicles[1]
 		TriggerClientEvent('phone:Garage', src, vehicles)
 		TriggerClientEvent('garages:getVehicles', src, vehicles)
@@ -90,10 +90,10 @@ AddEventHandler('garages:getVehicleList', function()
 end)
 
 AddEventHandler('onResourceStart', function(resourceName)
-	exports.ghmattimysql:execute('SELECT * FROM characters_cars', {}, function(vehicles)
+	exports.oxmysql:execute('SELECT * FROM characters_cars', {}, function(vehicles)
 		for k, v in ipairs(vehicles) do
 			if v.vehicle_state == "Out" then
-				exports.ghmattimysql:execute("UPDATE characters_cars SET vehicle_state = @state, current_garage = @garage, coords = @coords WHERE license_plate = @plate", {['garage'] = 'Impound Lot', ['state'] = 'Normal Impound', ['coords'] = nil, ['plate'] = v.license_plate})
+				exports.oxmysql:execute("UPDATE characters_cars SET vehicle_state = @state, current_garage = @garage, coords = @coords WHERE license_plate = @plate", {['garage'] = 'Impound Lot', ['state'] = 'Normal Impound', ['coords'] = nil, ['plate'] = v.license_plate})
 			end
 		end
 	end)
@@ -109,7 +109,7 @@ end)
 -- 	local user = exports["ethical-base"]:getModule("Player"):GetUser(src)
 -- 	local character = user:getCurrentCharacter()
 -- 	local state = "Out"
--- 	exports.ghmattimysql:execute("SELECT license_plate FROM characters_cars WHERE vehicle_state = @state AND cid = @cid",{  ['state'] = state, ["cid"} = character.id}, function(result)
+-- 	exports.oxmysql:execute("SELECT license_plate FROM characters_cars WHERE vehicle_state = @state AND cid = @cid",{  ['state'] = state, ["cid"} = character.id}, function(result)
 -- 		local myKeys = {}
 -- 		if(result)then
 -- 			for k,v in ipairs(result) do
@@ -189,7 +189,7 @@ AddEventHandler('updateVehicle', function(vehicleMods,plate)
 	local owner = user:getVar("hexid")
 	if not owner then return end
 	vehicleMods = json.encode(vehicleMods)
-	exports.ghmattimysql:execute("UPDATE characters_cars SET data=@mods WHERE license_plate = @plate",
+	exports.oxmysql:execute("UPDATE characters_cars SET data=@mods WHERE license_plate = @plate",
 	{['mods'] = vehicleMods, ['plate'] = plate})
 end)
 
@@ -199,7 +199,7 @@ AddEventHandler("garages:CheckGarageForVeh", function()
     local char = user:getCurrentCharacter()
     local owner = char.id
 
-    exports.ghmattimysql:execute('SELECT * FROM characters_cars WHERE cid = @cid', { ['@cid'] = owner }, function(vehicles)
+    exports.oxmysql:execute('SELECT * FROM characters_cars WHERE cid = @cid', { ['@cid'] = owner }, function(vehicles)
 		local v = vehicles[1]
         TriggerClientEvent('phone:Garage', src, vehicles)
         TriggerClientEvent('garages:getVehicles', src, vehicles)
@@ -212,7 +212,7 @@ AddEventHandler("garages:SetVehIn",function(plate, garage, fuel)
 	local char = user:getCurrentCharacter()
 	local owner = char.id
 	local state = "In"
-	exports.ghmattimysql:execute("UPDATE characters_cars SET vehicle_state = @state, current_garage = @garage, fuel = @fuel, coords = @coords WHERE license_plate = @plate", {['garage'] = garage, ['state'] = state, ['plate'] = plate,  ['fuel'] = fuel, ['coords'] = nil})
+	exports.oxmysql:execute("UPDATE characters_cars SET vehicle_state = @state, current_garage = @garage, fuel = @fuel, coords = @coords WHERE license_plate = @plate", {['garage'] = garage, ['state'] = state, ['plate'] = plate,  ['fuel'] = fuel, ['coords'] = nil})
 end)
 
 AddEventHandler('garages:SetVehOut', function(vehicle, plate)
@@ -221,7 +221,7 @@ AddEventHandler('garages:SetVehOut', function(vehicle, plate)
 	local char = user:getCurrentCharacter()
 	local owner = char.id
 	local state = "Out"
-	 exports.ghmattimysql:execute("UPDATE characters_cars SET vehicle_state = @state WHERE license_plate = @plate", {['garage'] = garage, ['state'] = state, ['plate'] = plate})
+	 exports.oxmysql:execute("UPDATE characters_cars SET vehicle_state = @state WHERE license_plate = @plate", {['garage'] = garage, ['state'] = state, ['plate'] = plate})
   end)
 
   AddEventHandler('garages:CheckForVeh', function()
@@ -231,7 +231,7 @@ AddEventHandler('garages:SetVehOut', function(vehicle, plate)
 	local state = "Out"
 
 	 
-	  exports.ghmattimysql:execute('SELECT * FROM characters_cars WHERE cid = @cid AND vehicle_state = @state', {['@cid'] = char.id, ['@state'] = state, ['@vehicle'] = vehicle}, function(result)
+	  exports.oxmysql:execute('SELECT * FROM characters_cars WHERE cid = @cid AND vehicle_state = @state', {['@cid'] = char.id, ['@state'] = state, ['@vehicle'] = vehicle}, function(result)
 		if result[1] ~= nil then
 			local plates = result[1].license_plate
 			vehiclse = json.decode(result[1].data)
@@ -254,7 +254,7 @@ AddEventHandler('garages:CheckForSpawnVeh', function(veh_id, garageCost)
 	local owner = char.id
 	local veh_id = veh_id
 	print('this is veh_id ', veh_id)
-			exports.ghmattimysql:execute('SELECT * FROM characters_cars WHERE id = @id AND cid = @cid', {['@id'] = veh_id, ['@cid'] = char.id}, function(result)
+			exports.oxmysql:execute('SELECT * FROM characters_cars WHERE id = @id AND cid = @cid', {['@id'] = veh_id, ['@cid'] = char.id}, function(result)
 				local res = result[1]
 				local currentgarage = res.current_garage
 				print('fuck you ', currentgarage)
@@ -279,7 +279,7 @@ end)
 -- Functions
 function setVehiclesIn()
 	local serverNumber = GetConvarInt("sv_servernumber")
-	exports.ghmattimysql:execute("UPDATE characters_cars SET vehicle_state=@in WHERE vehicle_state = @out AND server_number = @serverNumber",
+	exports.oxmysql:execute("UPDATE characters_cars SET vehicle_state=@in WHERE vehicle_state = @out AND server_number = @serverNumber",
 	{["in"] = "In", ["out"] = "Out", ["serverNumber"] = serverNumber})
 end
 
@@ -330,7 +330,7 @@ AddEventHandler('garages:SelVehJudge', function(plate)
 	local owner = char.id
 	
 	local player = user:getVar("hexid")
-	exports.ghmattimysql:execute("SELECT purchase_price FROM characters_cars WHERE license_plate = @plate",{['username'] = player, ['vehicle'] = vehicle}, function(result)
+	exports.oxmysql:execute("SELECT purchase_price FROM characters_cars WHERE license_plate = @plate",{['username'] = player, ['vehicle'] = vehicle}, function(result)
 
 		if(result)then
 			for k,v in ipairs(result) do
@@ -340,7 +340,7 @@ AddEventHandler('garages:SelVehJudge', function(plate)
 			end
 		end
 
-		exports.ghmattimysql:execute("DELETE from characters_cars WHERE license_plate = @plate AND cid = @cid",
+		exports.oxmysql:execute("DELETE from characters_cars WHERE license_plate = @plate AND cid = @cid",
 		{['username'] = player, ['plate'] = plate, ["cid"] = character.id})
 		TriggerClientEvent("DoLongHudText",src, "Sold",1)
 	end)
@@ -374,7 +374,7 @@ AddEventHandler('garages:SellToPlayer', function(price,plate,player)
 	local state = "Out"
 	local player = user:getVar("hexid")
 
-	exports.ghmattimysql:execute("SELECT model,license_plate FROM characters_cars WHERE vehicle_state =@state AND license_plate =@plate AND cid = @cid", function(result)
+	exports.oxmysql:execute("SELECT model,license_plate FROM characters_cars WHERE vehicle_state =@state AND license_plate =@plate AND cid = @cid", function(result)
 		if(result and result[1] )then
 			local vehicle, vehPlate = result[1].model, result[1].license_plate
 			TriggerClientEvent('garages:SelVehicleToPlayer', src, vehicle, vehPlate,player,price)
@@ -388,7 +388,7 @@ AddEventHandler('garages:SellVeh', function(plate)
 	local character = user:getCurrentCharacter()
 
 	local player = user:getVar("hexid")
-	exports.ghmattimysql:execute("SELECT purchase_price FROM characters_cars WHERE license_plate = @plate",{['username'] = player, ['vehicle'] = vehicle, ['plate'] = plate, ["cid"] = character.id}, function(result)
+	exports.oxmysql:execute("SELECT purchase_price FROM characters_cars WHERE license_plate = @plate",{['username'] = player, ['vehicle'] = vehicle, ['plate'] = plate, ["cid"] = character.id}, function(result)
 		if (result) then
 			for k,v in ipairs(result) do
 				price = v.purchase_price
@@ -397,7 +397,7 @@ AddEventHandler('garages:SellVeh', function(plate)
 			end
 		end
 
-		exports.ghmattimysql:execute("DELETE from characters_cars WHERE license_plate = @plate AND cid = @cid",
+		exports.oxmysql:execute("DELETE from characters_cars WHERE license_plate = @plate AND cid = @cid",
 		{['username'] = player, ['plate'] = plate, ["cid"] = character.id})
 		TriggerClientEvent("DoLongHudText",src, "Sold",1)
 	end)
@@ -419,11 +419,11 @@ AddEventHandler('garages:SellToPlayerEnd', function(plate,target,price)
 	local phone_number = characterTarg.phone_number .. " | " .. characterTarg.first_name .. " " .. characterTarg.last_name
 
 	if userTarg:getCash() >= price then 
-		exports.ghmattimysql:execute("SELECT id FROM characters_cars WHERE license_plate = @plate",{['username'] = player, ['vehicle'] = vehicle, ['plate'] = plate}, function(result)
+		exports.oxmysql:execute("SELECT id FROM characters_cars WHERE license_plate = @plate",{['username'] = player, ['vehicle'] = vehicle, ['plate'] = plate}, function(result)
 			if(result[1]) then 
 				userTarg:removeMoney(price)
 				user:addMoney(price)
-				exports.ghmattimysql:execute("UPDATE characters_cars SET cid=@targetcid, phone_number=@phone_number WHERE license_plate = @plate AND cid = @cid",
+				exports.oxmysql:execute("UPDATE characters_cars SET cid=@targetcid, phone_number=@phone_number WHERE license_plate = @plate AND cid = @cid",
 				{['targetCid'] = targetCid, ['plate'] = plate, ["cid"] = character.id, ['phone_number'] = phune_number })
 					exports["ethical-log"]:AddLog("Vehicle Transfer", user, "Char "..character.id.." Sold a vehicle [" .. plate .. "] to Char" .. targetCid.." for"..price)
 					TriggerClientEvent('garages:ClientEnd',src,plate)
@@ -469,7 +469,7 @@ local values = {
 RegisterServerEvent("request:illegal:upgrades")
 AddEventHandler("request:illegal:upgrades", function(plt)
 	local src = source
-	exports.ghmattimysql:execute("SELECT Extractors,Filter,Suspension,Rollbars,Bored,Carbon,LFront,RFront,LBack,RBack FROM modded_cars WHERE license_plate = @plt", {["plt"] = plt}, function(result)
+	exports.oxmysql:execute("SELECT Extractors,Filter,Suspension,Rollbars,Bored,Carbon,LFront,RFront,LBack,RBack FROM modded_cars WHERE license_plate = @plt", {["plt"] = plt}, function(result)
 		if result[1] ~= nil then
 
 			local Extractors = result[1].Extractors
@@ -516,16 +516,16 @@ AddEventHandler("upgradeAttempt:illegalparts", function(partnum,Lplate)
 		theVar = "RBack"
 	end
 
-	exports.ghmattimysql:execute("SELECT " .. theVar .. " FROM modded_cars WHERE license_plate = @plate", {['plate'] = lplate}, function(result)
+	exports.oxmysql:execute("SELECT " .. theVar .. " FROM modded_cars WHERE license_plate = @plate", {['plate'] = lplate}, function(result)
 		if result[1] ~= nil then
 
 			local resFac = result[1][theVar]
 
 			if resFac == 0 or resFac == nil then
-				exports.ghmattimysql:execute("UPDATE modded_cars SET " ..theVar.."=@state WHERE license_plate = @plate", {['plate'] = lplate, ['state'] = 1})
+				exports.oxmysql:execute("UPDATE modded_cars SET " ..theVar.."=@state WHERE license_plate = @plate", {['plate'] = lplate, ['state'] = 1})
 				TriggerClientEvent("client:illegal:upgrades:accept",src,lplate,partnum,1)
 			else
-				exports.ghmattimysql:execute("UPDATE modded_cars SET " ..theVar.."=@state WHERE license_plate = @plate", {['plate'] = lplate, ['state'] = 0})
+				exports.oxmysql:execute("UPDATE modded_cars SET " ..theVar.."=@state WHERE license_plate = @plate", {['plate'] = lplate, ['state'] = 0})
 				TriggerClientEvent("client:illegal:upgrades:accept",src,lplate,partnum,0)
 			end
 

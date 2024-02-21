@@ -1,22 +1,3 @@
--- --------------------------------------------------------
--- Host:                         127.0.0.1
--- Server version:               10.3.16-MariaDB - mariadb.org binary distribution
--- Server OS:                    Win64
--- HeidiSQL Version:             10.2.0.5599
--- --------------------------------------------------------
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET NAMES utf8 */;
-/*!50503 SET NAMES utf8mb4 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-
-
--- Dumping database structure for ethical
-CREATE DATABASE IF NOT EXISTS `ethical` /*!40100 DEFAULT CHARACTER SET utf8mb4 */;
-USE `ethical`;
-
--- Dumping structure for table ethical.fine_types
 CREATE TABLE IF NOT EXISTS `fine_types` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `label` varchar(255) DEFAULT NULL,
@@ -26,8 +7,6 @@ CREATE TABLE IF NOT EXISTS `fine_types` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=113 DEFAULT CHARSET=latin1;
 
--- Dumping data for table ethical.fine_types: ~112 rows (approximately)
-/*!40000 ALTER TABLE `fine_types` DISABLE KEYS */;
 INSERT INTO `fine_types` (`id`, `label`, `amount`, `jailtime`, `category`) VALUES
 	(1, 'Capital Murder', 100000, 999, 0),
 	(2, 'First Degree Murder', 100000, 400, 0),
@@ -141,9 +120,7 @@ INSERT INTO `fine_types` (`id`, `label`, `amount`, `jailtime`, `category`) VALUE
 	(110, 'Ticket | Verbal Harassment ', 750, 0, 0),
 	(111, 'Ticket | Larcency', 500, 0, 0),
 	(112, 'Ticket | Disturbing the Peace', 250, 0, 0);
-/*!40000 ALTER TABLE `fine_types` ENABLE KEYS */;
 
--- Dumping structure for table ethical.mdt_reports
 CREATE TABLE IF NOT EXISTS `mdt_reports` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cid` int(11) DEFAULT NULL,
@@ -157,15 +134,11 @@ CREATE TABLE IF NOT EXISTS `mdt_reports` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4;
 
--- Dumping data for table ethical.mdt_reports: ~2 rows (approximately)
-/*!40000 ALTER TABLE `mdt_reports` DISABLE KEYS */;
 INSERT INTO `mdt_reports` (`id`, `cid`, `title`, `incident`, `charges`, `officer`, `name`, `date`, `jailtime`) VALUES
 	(1, 61, 'Warrant', 'Burglar', '12', 'white', 'wingz', '12-10-1991', 1),
 	(2, 62, 'Test', 'test', '{"Store Robbery":1}', NULL, 'white wingz', '03-15-2021 01:31:30', 1),
 	(3, 3, 'Murder', 'dumb ass', '{"Aggravated First Degree Murder":1,"Aggravated Second Degree Murder":1,"Aggravated Attempted Murder":1,"Second Degree Murder":1,"Attempted Murder":1,"Involuntary Manslaughter":1,"Capital Murder":1}', NULL, 'Noah Jamerson', '03-15-2021 01:32:48', 30);
-/*!40000 ALTER TABLE `mdt_reports` ENABLE KEYS */;
 
--- Dumping structure for table ethical.mdt_warrants
 CREATE TABLE IF NOT EXISTS `mdt_warrants` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(255) DEFAULT NULL,
@@ -180,11 +153,6 @@ CREATE TABLE IF NOT EXISTS `mdt_warrants` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
 
--- Dumping data for table ethical.mdt_warrants: ~0 rows (approximately)
-/*!40000 ALTER TABLE `mdt_warrants` DISABLE KEYS */;
-/*!40000 ALTER TABLE `mdt_warrants` ENABLE KEYS */;
-
--- Dumping structure for table ethical.user_convictions
 CREATE TABLE IF NOT EXISTS `user_convictions` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cid` int(11) DEFAULT NULL,
@@ -193,8 +161,6 @@ CREATE TABLE IF NOT EXISTS `user_convictions` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4;
 
--- Dumping data for table ethical.user_convictions: ~9 rows (approximately)
-/*!40000 ALTER TABLE `user_convictions` DISABLE KEYS */;
 INSERT INTO `user_convictions` (`id`, `cid`, `offense`, `count`) VALUES
 	(1, 62, 'Burglar', 1),
 	(2, 62, 'Store Robbery', 1),
@@ -205,9 +171,7 @@ INSERT INTO `user_convictions` (`id`, `cid`, `offense`, `count`) VALUES
 	(7, 3, 'Attempted Murder', 1),
 	(8, 3, 'Capital Murder', 1),
 	(9, 3, 'Involuntary Manslaughter', 1);
-/*!40000 ALTER TABLE `user_convictions` ENABLE KEYS */;
 
--- Dumping structure for table ethical.user_licenses
 CREATE TABLE IF NOT EXISTS `user_licenses` (
   `identifier` text NOT NULL,
   `drivers` int(11) NOT NULL DEFAULT 1,
@@ -220,13 +184,9 @@ CREATE TABLE IF NOT EXISTS `user_licenses` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
 
--- Dumping data for table ethical.user_licenses: ~0 rows (approximately)
-/*!40000 ALTER TABLE `user_licenses` DISABLE KEYS */;
 INSERT INTO `user_licenses` (`identifier`, `drivers`, `business`, `weapon`, `id`, `cid`, `house`, `bar`) VALUES
 	('steam:11000010aa15521', 1, 0, 0, 1, 62, 1, 0);
-/*!40000 ALTER TABLE `user_licenses` ENABLE KEYS */;
 
--- Dumping structure for table ethical.user_mdt
 CREATE TABLE IF NOT EXISTS `user_mdt` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `cid` int(11) DEFAULT NULL,
@@ -235,12 +195,5 @@ CREATE TABLE IF NOT EXISTS `user_mdt` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4;
 
--- Dumping data for table ethical.user_mdt: ~0 rows (approximately)
-/*!40000 ALTER TABLE `user_mdt` DISABLE KEYS */;
 INSERT INTO `user_mdt` (`id`, `cid`, `notes`, `mugshot_url`) VALUES
 	(1, 62, 'This is note in mdt', NULL);
-/*!40000 ALTER TABLE `user_mdt` ENABLE KEYS */;
-
-/*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
-/*!40014 SET FOREIGN_KEY_CHECKS=IF(@OLD_FOREIGN_KEY_CHECKS IS NULL, 1, @OLD_FOREIGN_KEY_CHECKS) */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -312,7 +312,7 @@ on('__cfx_nui:dropIncorrectItems', (data, cb) => {
     }, 2000);
 });
 
-//  $.post("http://ethical-inventory/SlotJustUsed", JSON.stringify({target: targetSlot, origin: originSlot, itemid: itemidsent }));
+//  $.post("https://ethical-inventory/SlotJustUsed", JSON.stringify({target: targetSlot, origin: originSlot, itemid: itemidsent }));
 let recentused = [];
 RegisterNuiCallbackType('SlotJustUsed');
 on('__cfx_nui:SlotJustUsed', (data, cb) => {
@@ -713,11 +713,18 @@ function Scan(row) {
 
 RegisterNetEvent('ethical-items:SetAmmo');
 on('ethical-items:SetAmmo', (sentammoTable) => {
-    if (sentammoTable) {
-        ammoTable = sentammoTable;
+    try {
+        if (sentammoTable && typeof sentammoTable === 'string') {
+            ammoTable = JSON.parse(sentammoTable);
+            CacheBinds(ammoTable);
+        } else {
+            console.error('Invalid or empty JSON data received:', sentammoTable);
+        }
+    } catch (error) {
+        console.error('Error parsing JSON:', error);
     }
-    CacheBinds(JSON.parse(MyInventory));
 });
+
 
 function CacheBinds(sqlInventory) {
     boundItems = {};

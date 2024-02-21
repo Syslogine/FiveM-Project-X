@@ -400,12 +400,3 @@ RegisterNetEvent("ply_docks:SetBoatInventory")
 AddEventHandler("ply_docks:SetBoatInventory", function(boats)
 	BOATS = boats
 end)
-
-RemoveIpl('v_carshowroom')
-RemoveIpl('shutter_open')
-RemoveIpl('shutter_closed')
-RemoveIpl('shr_int')
-RemoveIpl('csr_inMission')
-RequestIpl('v_carshowroom')
-RequestIpl('shr_int')
-RequestIpl('shutter_closed')

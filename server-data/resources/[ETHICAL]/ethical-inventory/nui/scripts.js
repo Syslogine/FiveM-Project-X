@@ -1234,7 +1234,7 @@ function DisplayInventory(sqlInventory, itemCount, invName, main) {
                     itemMaxed = "class='perfect'";
                 }
 
-                $.post("http://ethical-inventory/updateMyQuality", JSON.stringify({
+                $.post("https://ethical-inventory/updateMyQuality", JSON.stringify({
                     itemid: itemid,
                     slot: slot,
                     quality: quality

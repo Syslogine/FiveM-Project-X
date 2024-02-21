@@ -42,13 +42,18 @@ RegisterServerEvent('carshop:requesttable')
 AddEventHandler('carshop:requesttable', function()
     local src = source
     local user = exports["ethical-base"]:getModule("Player"):GetUser(src)
-    exports.ghmattimysql:execute('SELECT * FROM vehicle_display', function(result)
-  
-    for k,v in pairs(result[1]) do
-        carTable[v.id] = v
-        v.price = carTable[v.id].baseprice
-    end
-    TriggerClientEvent('veh_shop:returnTable', user.source, carTable)
+    exports.oxmysql:execute('SELECT * FROM vehicle_display', {}, function(result)
+        if result and #result > 0 then  -- Check if the result is not nil and not empty
+            for k,v in pairs(result) do  -- Iterate directly over result
+                if carTable[v.id] then  -- Ensure there's a corresponding entry in carTable
+                    carTable[v.id] = v
+                    v.price = carTable[v.id].baseprice
+                end
+            end
+            TriggerClientEvent('veh_shop:returnTable', src, carTable)  -- Use 'src' instead of 'user.source'
+        else
+            print("No results found for vehicle_display.")
+        end
     end)
 end)
 
@@ -89,7 +94,7 @@ AddEventHandler('BuyForVeh', function(platew, name, vehicle, price, financed)
         local cols = 'owner, cid, license_plate, name, purchase_price, financed, last_payment, model, vehicle_state, payments_left'
         local val = '@owner, @cid, @license_plate, @name, @buy_price, @financed, @last_payment, @model, @veh_state, @payments_left'
         local downPay = math.ceil(price / 4)
-        exports.ghmattimysql:execute('INSERT INTO characters_cars ( '..cols..' ) VALUES ( '..val..' )',{
+        exports.oxmysql:execute('INSERT INTO characters_cars ( '..cols..' ) VALUES ( '..val..' )',{
             ['@owner'] = player,
             ['@cid'] = char.id,
             ['@license_plate']   = platew,
@@ -102,7 +107,7 @@ AddEventHandler('BuyForVeh', function(platew, name, vehicle, price, financed)
             ['@veh_state'] = "Out",
         })
     else
-        exports.ghmattimysql:execute('INSERT INTO characters_cars (owner, cid, license_plate, name, model, purchase_price, vehicle_state) VALUES (@owner, @cid, @license_plate, @name, @model, @buy_price, @veh_state)',{
+        exports.oxmysql:execute('INSERT INTO characters_cars (owner, cid, license_plate, name, model, purchase_price, vehicle_state) VALUES (@owner, @cid, @license_plate, @name, @model, @buy_price, @veh_state)',{
             ['@owner']   = player,
             ['@cid'] = char.id,
             ['@license_plate']   = platew,
@@ -117,7 +122,7 @@ end)
     
 function updateDisplayVehicles()
     for i=1, #carTable do
-        exports.ghmattimysql:execute("UPDATE vehicle_display SET model=@model, commission=@commission, baseprice=@baseprice WHERE ID=@ID",{
+        exports.oxmysql:execute("UPDATE vehicle_display SET model=@model, commission=@commission, baseprice=@baseprice WHERE ID=@ID",{
             ['@ID'] = i,
             ['@model'] = carTable[i]["model"],
             ['@commission'] = carTable[i]["commission"],
@@ -143,16 +148,16 @@ function PayVehicleFinance(vehicleplate)
     local char = user:getVar("character")
     local player = user:getVar("hexid")
 
-    exports.ghmattimysql:execute("SELECT * FROM `characters_cars` WHERE license_plate = @license_plate", {['license_plate'] = vehicleplate}, function(result)
+    exports.oxmysql:execute("SELECT * FROM `characters_cars` WHERE license_plate = @license_plate", {['license_plate'] = vehicleplate}, function(result)
        local vehiclepaymentsleft = result[1].payments_left
        local vehicletotalamount = result[1].financed
        if tonumber(result[1].last_payment) <= 0 then
-       exports.ghmattimysql:execute("UPDATE characters_cars SET payments_left = @payments_left, last_payment = @last_payment WHERE license_plate = @license_plate",
+       exports.oxmysql:execute("UPDATE characters_cars SET payments_left = @payments_left, last_payment = @last_payment WHERE license_plate = @license_plate",
           {['license_plate'] = vehicleplate,
           ['@payments_left'] = vehiclepaymentsleft - 1,
           ['@last_payment'] = 7,
         })
-        exports.ghmattimysql:execute("UPDATE characters_cars SET financed = @financed WHERE license_plate = @license_plate",
+        exports.oxmysql:execute("UPDATE characters_cars SET financed = @financed WHERE license_plate = @license_plate",
         {['license_plate'] = vehicleplate,
         ['@financed'] = vehicletotalamount - vehicletotalamount / 12,
       })
@@ -167,13 +172,13 @@ end
 
 function updateCarDueDates() 
     local changed = 0
-    exports.ghmattimysql:execute('SELECT * FROM characters_cars', {
+    exports.oxmysql:execute('SELECT * FROM characters_cars', {
     }, function(result)
         for k,v in pairs(result) do
             local new_last_payment = tonumber(v.last_payment - 1)
             if new_last_payment >= 0 then
                 changed = changed + 1
-                exports.ghmattimysql:execute("UPDATE characters_cars SET last_payment = @timer WHERE license_plate = @license_plate",
+                exports.oxmysql:execute("UPDATE characters_cars SET last_payment = @timer WHERE license_plate = @license_plate",
                     {['license_plate'] = tostring(v.license_plate),
                     ['@timer'] = new_last_payment,
                 })

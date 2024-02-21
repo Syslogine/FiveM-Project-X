@@ -174,7 +174,7 @@ RegisterServerEvent('admin:setGroup')
 AddEventHandler('admin:setGroup', function(pSrc, target, rank)
     local user = exports["ethical-base"]:getModule("Player"):GetUser(target)
     local hexId = user:getVar("hexid")
-    exports.ghmattimysql:execute("UPDATE users SET `rank` = @rank WHERE `hex_id` = @hex_id", {
+    exports.oxmysql:execute("UPDATE users SET `rank` = @rank WHERE `hex_id` = @hex_id", {
         ['rank'] = rank, 
         ['hex_id'] = hexId
     })
@@ -229,13 +229,13 @@ end)
 
 RegisterServerEvent("ethical-admin:update:vehicle")
 AddEventHandler("ethical-admin:update:vehicle", function(pSrc, vPlate)
-    exports.ghmattimysql:execute("SELECT * FROM characters_cars WHERE license_plate = @id", {['id'] = vPlate}, function(data)
+    exports.oxmysql:execute("SELECT * FROM characters_cars WHERE license_plate = @id", {['id'] = vPlate}, function(data)
         if data[1] then
             if data[1].vehicle_state == "In" then
-                exports.ghmattimysql:execute("UPDATE characters_cars SET `vehicle_state` = @vehicle_state WHERE `license_plate` = @id", { ['id'] = vPlate, ['vehicle_state'] = "Out"})
+                exports.oxmysql:execute("UPDATE characters_cars SET `vehicle_state` = @vehicle_state WHERE `license_plate` = @id", { ['id'] = vPlate, ['vehicle_state'] = "Out"})
                 TriggerClientEvent("DoLongHudText", pSrc, "Vehicle State: Out")
             elseif data[1].vehicle_state == "Out" then
-                exports.ghmattimysql:execute("UPDATE characters_cars SET `vehicle_state` = @vehicle_state WHERE `license_plate` = @id", { ['id'] = vPlate, ['vehicle_state'] = "In"})
+                exports.oxmysql:execute("UPDATE characters_cars SET `vehicle_state` = @vehicle_state WHERE `license_plate` = @id", { ['id'] = vPlate, ['vehicle_state'] = "In"})
                 TriggerClientEvent("DoLongHudText", pSrc, "Vehicle State: In")
             end
         end

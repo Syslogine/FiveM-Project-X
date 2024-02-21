@@ -23,7 +23,7 @@ function ETHICAL.Admin.DB.giveCar(car, cid)
     ["license_plate"] = math.random(10000,99999) 
     }
 
-    exports.ghmattimysql:execute(q, v, function()
+    exports.oxmysql:execute(q, v, function()
 
     end)
 end
@@ -34,7 +34,7 @@ function ETHICAL.Admin.DB.UnbanSteamId(steamid)
     ["id"] = steamid
     }
 
-    exports.ghmattimysql:execute(q, v, function()
+    exports.oxmysql:execute(q, v, function()
 
     end)
 end
@@ -46,7 +46,7 @@ function ETHICAL.Admin.DB.IsPlayerBanned(target, callback)
     local q = [[SELECT * FROM user_bans WHERE steam_id = @id LIMIT 1;]]
     local v = {["id"] = steamid}
 
-    exports.ghmattimysql:execute(q, v, function(result)
+    exports.oxmysql:execute(q, v, function(result)
         if not result then callback(false, true) return else callback(true,false) end
 
     end)

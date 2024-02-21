@@ -14,7 +14,7 @@ $(function()
 })
 
 function sendNuiMessage(data){
-    $.post("http://ethical-admin/nuiMessage", JSON.stringify(data));
+    $.post("https://ethical-admin/nuiMessage", JSON.stringify(data));
 }
 
 function receivedNuiMessage(event){

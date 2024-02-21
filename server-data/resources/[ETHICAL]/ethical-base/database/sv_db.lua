@@ -33,7 +33,7 @@ function ETHICAL.DB.CreateNewPlayer(self, src, callback)
         ["name"] = data.name
     }    
 
-    exports.ghmattimysql:execute(q, v, function(rowsChanged)
+    exports.oxmysql:execute(q, v, function(rowsChanged)
         if not rowsChanged or not rowsChanged.changedRows then callback(false, true) return end
 
         local created = rowsChanged and true or false
@@ -66,7 +66,7 @@ function ETHICAL.DB.CreateNewCharacter(self, src, data2, hexid, ph, callback)
         ["story"] = data.story
     }
 
-    exports.ghmattimysql:execute(q, v, function(rowsChanged)
+    exports.oxmysql:execute(q, v, function(rowsChanged)
 
         if not rowsChanged or not rowsChanged.changedRows then callback(false, true) return end
 
@@ -86,7 +86,7 @@ function ETHICAL.DB.PlayerExistsDB(self, src, callback)
     local q = [[SELECT hex_id FROM users WHERE hex_id = @id LIMIT 1;]]
     local v = {["id"] = hexId}
 
-    exports.ghmattimysql:execute(q, v, function(results)
+    exports.oxmysql:execute(q, v, function(results)
         if not results then callback(false, true) return end
 
         local exists = (results and results[1]) and true or false
@@ -113,7 +113,7 @@ function ETHICAL.DB.PhoneNumberExists(self, src, phone_number, callback)
     }
 
 
-    exports.ghmattimysql:execute(q, v, function(results)
+    exports.oxmysql:execute(q, v, function(results)
         if not results then callback(false, true) print('error error EXORTS') return end
 
 
@@ -133,7 +133,7 @@ function ETHICAL.DB.FetchPlayerData(self, src, callback)
     local q = [[SELECT id, hex_id, steam_id, community_id, name, ip, rank FROM users WHERE hex_id = @id;]]
     local v = {["id"] = hexId}
 
-    exports.ghmattimysql:execute(q, v, function(results)
+    exports.oxmysql:execute(q, v, function(results)
         if not results then callback(false, true) return end
         results = results[1] and results or {}
 
@@ -156,7 +156,7 @@ function ETHICAL.DB.FetchCharacterData(self, user, callback)
     local q = [[SELECT id, owner, first_name, last_name, date_created,  cash, bank, phone_number, dob, story, gender, new, deleted, jail_time, dirty_money, gang_type, jail_time_mobster, stress_level, judge_type, iswjob FROM characters WHERE owner = @owner]]
     local v = {["owner"] = hexId}
 
-    exports.ghmattimysql:execute(q,v, function(results)
+    exports.oxmysql:execute(q,v, function(results)
         if not user then callback(false, true) print('we have error') return end
         results = results[1] and results or {}
         callback(results)
@@ -179,7 +179,7 @@ function ETHICAL.DB.DeleteCharacter(self, user, id, callback)
         ["id"] = id
     }
 
-    exports.ghmattimysql:execute(q, v, function(rowsChanged)
+    exports.oxmysql:execute(q, v, function(rowsChanged)
     if not rowsChanged.changedRows then callback(false, true) return end
 
     local deleted = rowsChanged and true or false
@@ -204,7 +204,7 @@ end
 --         ["id"] = id
 --     }
 
---     exports.ghmattimysql:execute(q, v, function(rowsChanged)
+--     exports.oxmysql:execute(q, v, function(rowsChanged)
 --     if not rowsChanged.changedRows then callback(false, true) return end
 
 --     local deleted = rowsChanged and true or false
@@ -229,7 +229,7 @@ function ETHICAL.DB.UpdateCharacterStressLevel(self, user, characterId, newLevel
         ["hexid"] = hexId,
         ["characterId"] = characterId
     }
-    exports.ghmattimysql:execute(q, v, function(rowsChanged)
+    exports.oxmysql:execute(q, v, function(rowsChanged)
         if not rowsChanged.changedRows then callback(true,false) return end
         local updated = rowsChanged and true or false
         callback(updated)
@@ -253,7 +253,7 @@ callback = callback and callback or function() return end
         ["hexid"] = hexId,
         ["characterId"] = characterId
     }
-    exports.ghmattimysql:execute(q, v, function(rowsChanged)
+    exports.oxmysql:execute(q, v, function(rowsChanged)
         if not rowsChanged.changedRows then callback(false, true) return end
         local updated = rowsChanged and true or false
         callback(updated)
@@ -277,7 +277,7 @@ function ETHICAL.DB.UpdateCharacterMoney(self, user, characterId, amount, callba
             ["hexid"] = hexId,
             ["characterId"] = characterId
         }
-        exports.ghmattimysql:execute(q, v, function(rowsChanged)
+        exports.oxmysql:execute(q, v, function(rowsChanged)
             if not rowsChanged.changedRows then callback(false, true) return end
             local updated = rowsChanged and true or false
             callback(updated)
@@ -300,7 +300,7 @@ function ETHICAL.DB.UpdateCharacterBank(self, user, characterId, amount, callbac
             ["hexid"] = hexId,
             ["characterId"] = characterId
         }
-        exports.ghmattimysql:execute(q, v, function(rowsChanged)
+        exports.oxmysql:execute(q, v, function(rowsChanged)
             if not rowsChanged.changedRows then callback(false, true) return end
             local updated = rowsChanged and true or false
             callback(updated)
@@ -320,7 +320,7 @@ function ETHICAL.DB.UpdateControls(self, src, controlsTable, callback)
             ["controls"] = json.encode(controlsTable),
             ["hexid"] = hexId
         }
-        exports.ghmattimysql:execute(q, v, function(rowsChanged)
+        exports.oxmysql:execute(q, v, function(rowsChanged)
             if not rowsChanged.changedRows then callback(false, true) return end
             local updated = rowsChanged and true or false
             callback(updated)
@@ -341,7 +341,7 @@ function ETHICAL.DB.GetControls(self, src, callback)
         local q = [[SELECT controls FROM users WHERE hex_id = @hex_id;]]
         local v = {["hex_id"] = hexid}
 
-        exports.ghmattimysql:execute(q,v, function(results)
+        exports.oxmysql:execute(q,v, function(results)
             if not user then callback(false, true) return end
             results = results[1] and results or {}
             callback(results)
@@ -362,7 +362,7 @@ function ETHICAL.DB.UpdateSettings(self, src, settingsTable, callback)
             ["settings"] = json.encode(settingsTable),
             ["hexid"] = hexId
         }
-        exports.ghmattimysql:execute(q, v, function(rowsChanged)
+        exports.oxmysql:execute(q, v, function(rowsChanged)
             if not rowsChanged.changedRows then callback(false, true) return end
             local updated = rowsChanged and true or false
             callback(updated)
@@ -382,7 +382,7 @@ function ETHICAL.DB.GetSettings(self, src, callback)
     local q = [[SELECT settings FROM users WHERE hex_id =@id;]]
     local v = {["id"] = hexid}
 
-    exports.ghmattimysql:execute(q,v, function(results)
+    exports.oxmysql:execute(q,v, function(results)
         if not user then callback(false, true) return end
         results = results[1] and results or {}
         callback(results)
@@ -412,7 +412,7 @@ function ETHICAL.DB.Something(self, src, callback)
     ]]
 
         local v = {["id"] = hexId}
-        exports.ghmattimysql:execute(q, v, function(results)
+        exports.oxmysql:execute(q, v, function(results)
         if not results then callback(false, true) return end
             results = results[1] and results or {}
             for i,v in ipairs(results) do

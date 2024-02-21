@@ -25,7 +25,7 @@ AddEventHandler("login:getCharModels", function(charlist, isReset)
         return
     end
 
-    exports.ghmattimysql:execute("SELECT cc.*, cf.*, ct.* FROM character_face cf LEFT JOIN character_current cc on cc.cid = cf.cid LEFT JOIN playerstattoos ct on ct.identifier = cf.cid WHERE cf.cid IN ("..list..")", {}, function(result)
+    exports.oxmysql:execute("SELECT cc.*, cf.*, ct.* FROM character_face cf LEFT JOIN character_current cc on cc.cid = cf.cid LEFT JOIN playersTattoos ct on ct.identifier = cf.cid WHERE cf.cid IN ("..list..")", {}, function(result)
         if result then 
             local temp_data = {}
 
@@ -79,14 +79,14 @@ AddEventHandler('white:setMetaHere',function()
 	local user = exports["ethical-base"]:getModule("Player"):GetUser(src)
 	local cid = user:getCurrentCharacter().id
 	local identifier = user:getCurrentCharacter().owner
-    exports.ghmattimysql:execute("SELECT * FROM user_licenses WHERE identifier = @identifier;", {["identifier"] = identifier}, function(result)
+    exports.oxmysql:execute("SELECT * FROM user_licenses WHERE identifier = @identifier;", {["identifier"] = identifier}, function(result)
         if result[1] then
             local data = "<b>Drivers</b> | "..result[1].drivers.." <br><b>Business</b> | "..result[1].business.." <br><b>Weapon</b> | "..result[1].weapon.." <br><b>House</b> | "..result[1].house.." <br><b>Bar</b> | "..result[1].bar.." <br>"
             TriggerClientEvent('updateLicenseString', src, data)
         else
-            exports.ghmattimysql:execute('SELECT * FROM user_appertement WHERE cid = @cid', {["cid"] = cCid}, function(result)
+            exports.oxmysql:execute('SELECT * FROM user_appertement WHERE cid = @cid', {["cid"] = cCid}, function(result)
                 if result ~= nil then
-                    exports.ghmattimysql:execute('INSERT INTO user_licenses (identifier, cid, drivers, weapon, business, house, bar) VALUES (@identifier, @cid, @drivers, @weapon, @business, @house, @bar)', {
+                    exports.oxmysql:execute('INSERT INTO user_licenses (identifier, cid, drivers, weapon, business, house, bar) VALUES (@identifier, @cid, @drivers, @weapon, @business, @house, @bar)', {
                             ['identifier'] = identifier,
                             ['cid'] = cid,
                             ['drivers'] = true,

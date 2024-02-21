@@ -5,7 +5,7 @@ end)
 RegisterServerEvent("server-item-quality-update")
 AddEventHandler("server-item-quality-update", function(player, data)
     if data.quality < 1 then
-        exports.ghmattimysql:execute("UPDATE user_inventory2 SET `quality` = @quality WHERE name = @name AND slot = @slot AND item_id = @item_id", {
+        exports.oxmysql:execute("UPDATE user_inventory2 SET `quality` = @quality WHERE name = @name AND slot = @slot AND item_id = @item_id", {
             ['quality'] = "0", 
             ['name'] = 'ply-' ..player, 
             ['slot'] = data.slot,
@@ -39,7 +39,7 @@ AddEventHandler('ethical-weapons:getAmmo', function()
     local src = source
 	local user = exports["ethical-base"]:getModule("Player"):GetUser(src)
     local char = user:getCurrentCharacter()
-    exports.ghmattimysql:execute("SELECT type, ammo FROM characters_weapons WHERE id = @id", {['id'] = char.id}, function(result)
+    exports.oxmysql:execute("SELECT type, ammo FROM characters_weapons WHERE id = @id", {['id'] = char.id}, function(result)
         for i = 1, #result do
             if ammoTable["" .. result[i].type .. ""] == nil then
                 ammoTable["" .. result[i].type .. ""] = {}
@@ -56,16 +56,16 @@ AddEventHandler('ethical-weapons:updateAmmo', function(newammo,ammoType,ammoTabl
     local src = source
 	local user = exports["ethical-base"]:getModule("Player"):GetUser(src)
     local char = user:getCurrentCharacter()
-    exports.ghmattimysql:execute('SELECT ammo FROM characters_weapons WHERE type = @type AND id = @identifier',{['@type'] = ammoType, ['@identifier'] = char.id}, function(result)
+    exports.oxmysql:execute('SELECT ammo FROM characters_weapons WHERE type = @type AND id = @identifier',{['@type'] = ammoType, ['@identifier'] = char.id}, function(result)
         if result[1] == nil then
-            exports.ghmattimysql:execute('INSERT INTO characters_weapons (id, type, ammo) VALUES (@identifier, @type, @ammo)', {
+            exports.oxmysql:execute('INSERT INTO characters_weapons (id, type, ammo) VALUES (@identifier, @type, @ammo)', {
                 ['@identifier'] = char.id,
                 ['@type'] = ammoType,
                 ['@ammo'] = newammo
             }, function()
             end)
         else
-            exports.ghmattimysql:execute('UPDATE characters_weapons SET ammo = @newammo WHERE type = @type AND ammo = @ammo AND id = @identifier', {
+            exports.oxmysql:execute('UPDATE characters_weapons SET ammo = @newammo WHERE type = @type AND ammo = @ammo AND id = @identifier', {
                 ['@identifier'] = char.id,
                 ['@type'] = ammoType,
                 ['@ammo'] = result[1].ammo,
@@ -88,14 +88,14 @@ AddEventHandler("ethical-inventory:update:settings", function(data)
         ["enableBlur"] = data.enableBlur
     }
     local encode = json.encode(insert)
-    exports.ghmattimysql:execute('UPDATE users SET inventory_settings = ? WHERE hex_id = ?', {encode, user})
+    exports.oxmysql:execute('UPDATE users SET inventory_settings = ? WHERE hex_id = ?', {encode, user})
 end)
 
 RegisterServerEvent("ethical-inventory:RetreiveSettings")
 AddEventHandler("ethical-inventory:RetreiveSettings", function()
     local src = source
     local user = GetPlayerIdentifiers(src)[1]
-    exports.ghmattimysql:execute("SELECT `inventory_settings` FROM users WHERE hex_id = @hex_id", {['hex_id'] = user}, function(result)
+    exports.oxmysql:execute("SELECT `inventory_settings` FROM users WHERE hex_id = @hex_id", {['hex_id'] = user}, function(result)
         if (result[1]) then
             TriggerClientEvent('ethical-base:update:settings', src, result[1].inventory_settings)
         end
