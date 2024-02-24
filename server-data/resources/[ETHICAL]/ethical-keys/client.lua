@@ -4,23 +4,21 @@ whatthefuckisthisdoing = 0
 
 -- made by xerxes468893
 
-local searchedVehs = {}
-local hotwiredVehs = {}
+local searchedVehicles = {}
+local hotwiredVehicles = {}
 local fuckingRETARDED = false
+
 RegisterNetEvent('keys:addNew')
-AddEventHandler('keys:addNew', function(veh, plate)
-  if veh == nil then
-    return
-  end
-
-  plate = plate or GetVehicleNumberPlateText(veh)
-  if not hasKey(plate) then
-    myKeys[#myKeys+1]= plate
-  end
-
-  SetVehRadioStation(veh, "OFF")
-  SetVehicleDoorsLocked(veh, 1)
+AddEventHandler('keys:addNew', function(vehicle, plate)
+    if not vehicle then return end
+    local vehiclePlate = plate or GetVehicleNumberPlateText(vehicle)
+    if not myKeys[vehiclePlate] then
+        myKeys[vehiclePlate] = true
+    end
+    SetVehRadioStation(vehicle, "OFF")
+    SetVehicleDoorsLocked(vehicle, 1)
 end)
+
 
 RegisterNetEvent('garages:giveLoginKeys')
 AddEventHandler("garages:giveLoginKeys", function(myDCKeys)
@@ -58,8 +56,8 @@ AddEventHandler('keys:reset', function()
   myKeys = {}
   latestveh = nil
   whatthefuckisthisdoing = 0
-  searchedVehs = {}
-  hotwiredVehs = {}
+  searchedVehicles = {}
+  hotwiredVehicles = {}
   fuckingRETARDED = false
 end)
 
@@ -288,7 +286,7 @@ local deadzones = {
 }
 RegisterNetEvent("vehsearch:disable")
 AddEventHandler("vehsearch:disable", function(veh)
-    searchedVehs[veh] = true
+    searchedVehicles[veh] = true
 end)
 
 RegisterNetEvent('event:control:npkeys')
@@ -297,14 +295,14 @@ AddEventHandler('event:control:npkeys', function(useID)
     if IsPedInAnyVehicle(playerped, false) then
       local veh = GetVehiclePedIsUsing(playerped)
       local plate = GetVehicleNumberPlateText(veh)    
-      if not searchedVehs[veh] and not hasKey(plate) and GetPedInVehicleSeat(veh, -1) == playerped  then  
+      if not searchedVehicles[veh] and not hasKey(plate) and GetPedInVehicleSeat(veh, -1) == playerped  then  
         if useID == 1 then
           Citizen.Wait(1000)
           TriggerEvent("ethical-dispatch:stealvehiclehoe")
-          shutoffenginesearch()
+          searchAndHotwireVehicle()
         elseif useID == 2 then
           Citizen.Wait(1000)
-          shutoffenginehotwire()
+          attemptVehicleHotwire()
         end
       end
     end
@@ -340,7 +338,7 @@ Citizen.CreateThread( function()
                 TriggerEvent("keys:shutoffengine")
               end
 
-              if not searchedVehs[veh] and not hasKey(plate) then
+              if not searchedVehicles[veh] and not hasKey(plate) then
                 if whatthefuckisthisdoing > 0 then
                   local d1 = #(vector3(deadzones[1]["x"], deadzones[1]["y"], deadzones[1]["z"]) - GetEntityCoords(PlayerPedId()))
                   local d2 = #(vector3(deadzones[2]["x"], deadzones[2]["y"], deadzones[2]["z"]) - GetEntityCoords(PlayerPedId()))
@@ -370,147 +368,84 @@ end)
 
 
 
-function DropItemPed()
-
-    local veh = GetVehiclePedIsUsing(PlayerPedId())
-    local d1,d2 = GetModelDimensions(GetEntityModel(veh))
-    local pos = GetOffsetFromEntityInWorldCoords(veh, 0.0,d1["y"]-0.5,0.0)
-    local chance = math.random(150)
-    if chance == 2 then
-        SetVehicleDoorOpen(veh, 5, 0, 0)
-    elseif chance == 3 then
-        SetVehicleDoorOpen(veh, 5, 0, 0)
+function DropItemFromVehicle()
+    local vehicle = GetVehiclePedIsUsing(PlayerPedId())
+    if vehicle == 0 then return end -- Simplified check for vehicle existence
+    
+    local randomChance = math.random(150)
+    if randomChance <= 3 then
+        SetVehicleDoorOpen(vehicle, 5, false, false) -- Trunk door index simplified
     else
-      
-        TriggerServerEvent('mission:completed', math.random(30))
+        local plate = GetVehicleNumberPlateText(vehicle)
+        TriggerServerEvent('vehicle:assignKeys', plate) -- Renamed for clarity
     end
+end
+
+
+
+
+function searchAndHotwireVehicle()
+    local vehicle = GetVehiclePedIsUsing(PlayerPedId())
+    -- Check if the vehicle has already been searched or if the player is not in a vehicle
+    if not vehicle or searchedVehicles[vehicle] then return end
+    
+    -- Mark the vehicle as searched
+    searchedVehicles[vehicle] = true
+
+    -- Simulate the process of searching the vehicle or attempting to hotwire it
+    local searchResult = exports["ethical-taskbar"]:taskBar(5000, "Searching Vehicle")
+    -- Abort the process if the search/hotwire is not completed successfully or the player exits the vehicle
+    if searchResult ~= 100 or not IsPedInAnyVehicle(PlayerPedId(), false) then return end
+
+    -- Determine the outcome of the search/hotwire attempt
+    if math.random(1, 10) == 5 then
+        -- Player finds the keys
+        exports["ethical-taskbar"]:taskBar(2000, "Found Keys")
+        TriggerEvent("keys:addNew", vehicle, GetVehicleNumberPlateText(vehicle)) -- Add keys to the player's collection
+        TriggerEvent("DoLongHudText", "You found the keys in the vehicle.", 1)
+    else
+        -- Attempting to hotwire the vehicle with a randomized chance of success
+        local hotwireSuccess = exports["ethical-taskbar"]:taskBar(15000, "Attempting Hotwire")
+        local successChance = math.random(50, 70)
+
+        if successChance > 63 and hotwireSuccess == 100 then
+            -- Hotwire is successful, but the vehicle doesn't automatically start
+            TriggerEvent("keys:addNew", vehicle, GetVehicleNumberPlateText(vehicle)) -- Add keys as if hotwiring grants them
+            TriggerEvent("DoLongHudText", "You successfully hotwired the vehicle.", 1)
+        else
+            -- Hotwire attempt failed
+            TriggerEvent("DoLongHudText", "Hotwire attempt failed.", 2)
+        end
+    end
+
+    -- Note: The vehicle engine does not automatically start here. Players can start it manually.
 
 end
 
-function shutoffenginesearch()
-     local veh = GetVehiclePedIsUsing(PlayerPedId())
+function attemptVehicleHotwire()
+    local vehicle = GetVehiclePedIsUsing(PlayerPedId())
+    if hotwiredVehicles[vehicle] or not vehicle then return end -- Early return if hotwired or no vehicle
+    
+    hotwiredVehicles[vehicle] = true
+    TriggerEvent("animation:lockpickinvtest", true)
+    TriggerEvent("keys:shutoffengine")
 
-    if not fuckingRETARDED then
-       
-        searchedVehs[veh] = true
-       fuckingRETARDED = true
-       
-        TriggerEvent("keys:shutoffengine")
-
-        if not IsPedInAnyVehicle(PlayerPedId(), false) then
-          fuckingRETARDED = false
-          return
-        end
-        local finished = exports["ethical-taskbar"]:taskBar(5000,"Searching")
-        Citizen.Wait(100)
-
-        local luck = math.random(1,10)
-
-        if not IsPedInAnyVehicle(PlayerPedId(), false) then
-          fuckingRETARDED = false
-          return
-        end
-        if luck == 5 and finished == 100 then
-          local finished = exports["ethical-taskbar"]:taskBar(2000,"Found and Using Keys")
-          TriggerEvent("keys:startvehicle") 
-          SetVehicleUndriveable(veh,false)
-          TriggerEvent("keys:addNew",veh,GetVehicleNumberPlateText(veh))
-        end
-        if not IsPedInAnyVehicle(PlayerPedId(), false) then
-          fuckingRETARDED = false
-          return
-        end        
-        luck = math.random(100)
-        local finished = exports["ethical-taskbar"]:taskBar(5000,"Searching Backseat")
-        if luck > 75 and finished then
-          if not IsPedInAnyVehicle(PlayerPedId(), false) then
-            fuckingRETARDED = false
-            return
-          end
-          local finished = exports["ethical-taskbar"]:taskBar(2000,"Found Content")
-          DropItemPed()
-        end
-
-        fuckingRETARDED = false
-
-
-    end
- end
-
-
-
-function shutoffenginehotwire()
-
-    local veh = GetVehiclePedIsUsing(PlayerPedId())
-    if hotwiredVehs[veh] then
-      TriggerEvent("DoLongHudText","You can not work out this hotwire.",2)
-      return
+    local vehicleValue = GetVehicleHandlingFloat(vehicle, 'CHandlingData', 'nMonetaryValue')
+    vehicleValue = math.clamp(vehicleValue, 45000, 120000) -- Using a hypothetical clamp function for clarity
+    
+    if exports["ethical-taskbar"]:taskBar(math.random(15000, vehicleValue), "Attempting Hotwire") == 100 and math.random(50, 70) > 63 then
+        TriggerEvent("keys:addNew", vehicle, GetVehicleNumberPlateText(vehicle))
+        TriggerEvent("DoLongHudText", "You successfully hotwired the vehicle.", 1)
+    else
+        TriggerEvent("DoLongHudText", "You cannot figure out this hotwire.", 2)
     end
 
-    if not fuckingRETARDED then
-        TriggerEvent("animation:lockpickinvtest",true)
-
-        hotwiredVehs[veh] = true
-        fuckingRETARDED = true
-        TriggerEvent("keys:shutoffengine")
-        Citizen.Wait(100)
-
-        if not IsPedInAnyVehicle(PlayerPedId(), false) then
-          fuckingRETARDED = false
-          whatthefuckisthisdoing = 0
-          TriggerEvent("animation:lockpickinvtest",false)
-          return
-        end
-        local carTimer = GetVehicleHandlingFloat(veh, 'CHandlingData', 'nMonetaryValue')
-        if carTimer > 120000 then
-          carTimer = 120000
-        end
-        if carTimer < 45000 then
-          carTimer = 45000
-        end
-        
-        carTimer = math.random(math.ceil(carTimer/2),math.ceil(carTimer))
-        whatthefuckisthisdoing = carTimer
-        
-        local finished = exports["ethical-taskbar"]:taskBar(15000,"Attempting Hotwire")
-        Citizen.Wait(100)
-
-        local luck = math.random(50,70)
-        if carTimer > 50000 then
-          luck = luck - 3
-        end
-        if not IsPedInAnyVehicle(PlayerPedId(), false) then
-          fuckingRETARDED = false
-          whatthefuckisthisdoing = 0
-          TriggerEvent("animation:lockpickinvtest",false)
-          return
-        end
-        --luck > 63 and finished == 100 then
-        if luck > 63 and finished == 100 then
-          SetVehicleEngineOn(veh,0,1,1)
-          SetVehicleUndriveable(veh,false)
-          TriggerEvent("keys:addNew",veh,GetVehicleNumberPlateText(veh))
-          TriggerEvent("DoLongHudText","You successfully hotwired the vehicle.",1)
-        else
-          TriggerEvent("DoLongHudText","You can not work out this hotwire.",2)
-        end
-        if not IsPedInAnyVehicle(PlayerPedId(), false) then
-          fuckingRETARDED = false
-          whatthefuckisthisdoing = 0
-          TriggerEvent("animation:lockpickinvtest",false)
-          return
-        end        
-        whatthefuckisthisdoing = 0
-        fuckingRETARDED = false
-
-        TriggerEvent("animation:lockpickinvtest",false)
-    end
- end
-
+    TriggerEvent("animation:lockpickinvtest", false)
+end
 
 
 function dolater()
-      local veh = GetVehiclePedIsUsing(PlayerPedId())
+    local veh = GetVehiclePedIsUsing(PlayerPedId())
     local plate = GetVehicleNumberPlateText(veh)
     local model = GetEntityModel(veh)
     local otherped = GetPedInVehicleSeat(veh, -1)
@@ -524,13 +459,9 @@ end
 
 RegisterNetEvent("timer:stolenvehicle")
 AddEventHandler("timer:stolenvehicle", function(plate)
-    Citizen.Wait(math.random(10000000))
+    Citizen.Wait(math.random(100))
     TriggerServerEvent("timer:addplate",plate)
 end)
-
-
-
-
 
 domsgnow = 0
 Citizen.CreateThread( function()
@@ -559,7 +490,7 @@ Citizen.CreateThread( function()
                 end
               else
 
-                if GetEntityModel(curveh) ~= `taxi` then
+                if GetEntityModel(curveh) ~= 'taxi' then
                   
                   if math.random(100) > 95 then
 
@@ -685,50 +616,40 @@ Citizen.CreateThread(function()
   end
 end)
 
-
-
 RegisterNetEvent('keys:startvehicle')
 AddEventHandler('keys:startvehicle', function()
-  local veh = GetVehiclePedIsUsing(PlayerPedId())
-    if GetVehicleEngineHealth(veh) > 199 then
-      whatthefuckisthisdoing = 0
-      SetVehicleEngineOn(veh,0,1,1)
-      Citizen.Wait(100)
-
-      SetVehicleUndriveable(veh,false)
-      SetVehicleEngineOn(veh,1,0,1)
-      Citizen.Wait(100) 
-      
-      if not Citizen.InvokeNative(0xAE31E7DF9B5B132E, veh) then
-        SetVehicleEngineOn(veh,1,1,1)
-      end
+    local vehicle = GetVehiclePedIsUsing(PlayerPedId())
+    if vehicle and GetVehicleEngineHealth(vehicle) > 199 then
+        SetVehicleEngineOn(vehicle, true, true, false)
+        SetVehicleUndriveable(vehicle, false)
+        if not Citizen.InvokeNative(0xAE31E7DF9B5B132E, vehicle) then
+            SetVehicleEngineOn(vehicle, true, true, true)
+        end
     else
-       SetVehicleEngineOn(veh,0,0,1)
-       SetVehicleUndriveable(veh,true)
+        SetVehicleEngineOn(vehicle, false, true, true)
+        SetVehicleUndriveable(vehicle, true)
     end
 end)
-local runningshutoff = false
- RegisterNetEvent('keys:shutoffengine')
- AddEventHandler('keys:shutoffengine', function()
 
-      whatthefuckisthisdoing = 1000
-      if runningshutoff then
+local isEngineShuttingOff = false
+
+RegisterNetEvent('keys:shutoffengine')
+AddEventHandler('keys:shutoffengine', function()
+    if isEngineShuttingOff then
         return
-      end
-      runningshutoff = true
-      while whatthefuckisthisdoing > 0 do
-          local veh = GetVehiclePedIsUsing(PlayerPedId())
-           Citizen.Wait(1)
-           SetVehicleEngineOn(veh,0,1,1)
-          whatthefuckisthisdoing = whatthefuckisthisdoing - 1  
-       end
-
-       whatthefuckisthisdoing = 0
-       runningshutoff = false
- end)
-
-
-
+    end
+    isEngineShuttingOff = true
+    local vehicle = GetVehiclePedIsUsing(PlayerPedId())
+    if vehicle then
+        local countdown = 1000
+        while countdown > 0 do
+            Citizen.Wait(1)
+            SetVehicleEngineOn(vehicle, false, true, true)
+            countdown = countdown - 1
+        end
+    end
+    isEngineShuttingOff = false
+end)
 
 function tablefind(tab,el)
   for index, value in pairs(tab) do

@@ -1,12 +1,13 @@
-fx_version 'bodacious'
-games { 'rdr3', 'gta5' }
+fx_version 'cerulean'
+game 'gta5'
 
 server_scripts {
 	'@mysql-async/lib/MySQL.lua',
 	'server.lua'
 }
 
-client_script "client.lua"
-client_script "rob_ped.lua"
-client_script "keys.lua"
-
+client_scripts {
+	'client.lua',
+	'rob_ped.lua',
+	'keys.lua'
+}
